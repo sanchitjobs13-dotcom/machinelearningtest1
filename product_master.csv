@@ -1,0 +1,8 @@
+product_id,product_name_standardized,product_grade_standard,default_unit_of_measure,aliases
+PROD-WTI-001,WTI Crude Oil,Light Sweet,BBL,WTI Crude|Crude Oil WTI|West Texas Intermediate Crude
+PROD-BRENT-001,Brent Crude Oil,Light Sweet,BBL,Brent Crude|Brent|Brent Crude Oil
+PROD-ULSD-001,Ultra-Low-Sulfur Diesel,15 ppm,GAL,ULSD|Ultra Low Sulfur Diesel|Ultra Low Sulfur Diesel #2
+PROD-PREMGAS-001,Premium Gasoline,92 Octane,GAL,Premium Gas
+PROD-REGGAS-001,Regular Gasoline,87 Octane,GAL,Regular Gasoline
+PROD-FUELOIL-001,Fuel Oil No. 2,Standard,GAL,Fuel Oil No 2
+PROD-HEATOIL-001,Heating Oil,#2 Distillate,GAL,Heating Oil

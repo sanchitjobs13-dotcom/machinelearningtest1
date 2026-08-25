@@ -1,0 +1,219 @@
+# -*- coding: utf-8 -*-
+import dataiku
+import pandas as pd, numpy as np
+from dataiku import pandasutils as pdu
+from datetime import datetime, timezone
+
+# Read recipe inputs
+Raw_Broker2 = dataiku.Dataset("Raw_Broker2")
+Raw_Broker2_df = Raw_Broker2.get_dataframe()
+Raw_Broker1 = dataiku.Dataset("Raw_Broker1")
+Raw_Broker1_df = Raw_Broker1.get_dataframe()
+Raw_Broker3 = dataiku.Dataset("Raw_Broker3")
+Raw_Broker3_df = Raw_Broker3.get_dataframe()
+Product_Master = dataiku.Dataset("Product_Master")
+PRODUCT_MASTER = Product_Master.get_dataframe()
+
+# ---------------------------------------------------------------------------
+# CONFIG: canonical schema, unit aliases
+# PRODUCT_MASTER now comes from the PRODUCT_MASTER dataset (see recipe inputs
+# above) instead of being hardcoded here. Anyone can add/edit product aliases
+# by editing that dataset - no code change or redeploy needed (FR-7 / FR-8).
+# ---------------------------------------------------------------------------
+
+CANONICAL_COLUMNS = [
+    "source_id", "source_name", "source_file_name", "source_sheet_name",
+    "source_row_number", "product_name_raw", "product_id",
+    "product_name_standardized", "product_grade", "market_region",
+    "pricing_date", "trade_date", "price", "currency", "unit_of_measure",
+    "quantity", "observation_type", "broker", "counterparty",
+    "confidence_score", "validation_status", "review_required",
+    "created_timestamp",
+]
+
+UNIT_ALIASES = {"barrel": "BBL", "bbl": "BBL", "gallon": "GAL", "gal": "GAL"}
+
+
+def match_product(raw_name):
+    if not isinstance(raw_name, str) or not raw_name.strip():
+        return None
+    needle = raw_name.strip().lower()
+    for _, row in PRODUCT_MASTER.iterrows():
+        if not isinstance(row["aliases"], str):
+            continue
+        aliases = [a.strip().lower() for a in row["aliases"].split("|")]
+        if needle in aliases:
+            return row
+    return None
+
+
+def normalize_unit(raw_unit):
+    if not isinstance(raw_unit, str):
+        return None
+    return UNIT_ALIASES.get(raw_unit.strip().lower(), raw_unit.strip().upper())
+
+
+def score_record(price, flags):
+    try:
+        price_ok = price is not None and float(price) > 0
+    except (TypeError, ValueError):
+        price_ok = False
+    if not price_ok:
+        return 0.0, "ERROR: MISSING_OR_INVALID_PRICE", True
+
+    deductions = {"UNMATCHED_PRODUCT": 0.30, "CURRENCY_ASSUMED": 0.10,
+                  "UNIT_DERIVED_FROM_PRODUCT_MASTER": 0.10,
+                  "GRADE_DERIVED_FROM_PRODUCT_MASTER": 0.05,
+                  "MISSING_QUANTITY": 0.05}
+    score = 1.0
+    for f in flags:
+        score -= deductions.get(f, 0)
+    score = round(max(score, 0.0), 2)
+
+    if not flags:
+        return score, "VALID", False
+    return score, "WARNING: " + ";".join(sorted(set(flags))), score < 0.90
+
+
+# ---------------------------------------------------------------------------
+# Per-source mapping functions
+# ---------------------------------------------------------------------------
+
+def map_broker1(df):
+    records = []
+    for i, row in df.iterrows():
+        flags = ["CURRENCY_ASSUMED"]  # Broker1 has no currency column
+        match = match_product(row.get("Commodity"))
+        if match is None:
+            flags.append("UNMATCHED_PRODUCT")
+        else:
+            flags.append("UNIT_DERIVED_FROM_PRODUCT_MASTER")  # Broker1 has no unit column
+        if pd.isna(row.get("Volume")):
+            flags.append("MISSING_QUANTITY")
+
+        price = row.get("Last_Trade")
+        confidence, status, review = score_record(price, flags)
+
+        records.append({
+            "source_id": "SRC-101",
+            "source_name": "Broker1 Daily Pricing Sheet",
+            "source_file_name": "Broker1.csv",
+            "source_sheet_name": None,
+            "source_row_number": i + 2,
+            "product_name_raw": row.get("Commodity"),
+            "product_id": match["product_id"] if match is not None else None,
+            "product_name_standardized": match["product_name_standardized"] if match is not None else None,
+            "product_grade": row.get("Grade"),
+            "market_region": row.get("Region"),
+            "pricing_date": row.get("Date"),
+            "trade_date": row.get("Date"),
+            "price": price,
+            "currency": "USD",
+            "unit_of_measure": match["default_unit_of_measure"] if match is not None else None,
+            "quantity": row.get("Volume"),
+            "observation_type": "LAST_TRADED_PRICE",
+            "broker": row.get("Trader"),
+            "counterparty": None,
+            "confidence_score": confidence,
+            "validation_status": status,
+            "review_required": review,
+            "created_timestamp": datetime.now(timezone.utc).isoformat(),
+        })
+    return pd.DataFrame(records, columns=CANONICAL_COLUMNS)
+
+
+def map_broker2(df):
+    records = []
+    for i, row in df.iterrows():
+        flags = ["CURRENCY_ASSUMED", "MISSING_QUANTITY"]  # no currency or quantity column
+        match = match_product(row.get("Product_Name"))
+        if match is None:
+            flags.append("UNMATCHED_PRODUCT")
+
+        price = row.get("Price_USD_per_Unit")
+        confidence, status, review = score_record(price, flags)
+
+        records.append({
+            "source_id": "SRC-102",
+            "source_name": "Broker2 Market Data Feed",
+            "source_file_name": "Broker2.csv",
+            "source_sheet_name": None,
+            "source_row_number": i + 2,
+            "product_name_raw": row.get("Product_Name"),
+            "product_id": match["product_id"] if match is not None else None,
+            "product_name_standardized": match["product_name_standardized"] if match is not None else None,
+            "product_grade": row.get("Grade_Spec"),
+            "market_region": row.get("Market"),
+            "pricing_date": row.get("Pricing_Date"),
+            "trade_date": row.get("Pricing_Date"),
+            "price": price,
+            "currency": "USD",
+            "unit_of_measure": row.get("UOM"),
+            "quantity": None,
+            "observation_type": "LAST_TRADED_PRICE",
+            "broker": "Broker2 Market Data Feed",  # no explicit broker/desk column in source
+            "counterparty": row.get("Counterparty"),
+            "confidence_score": confidence,
+            "validation_status": status,
+            "review_required": review,
+            "created_timestamp": datetime.now(timezone.utc).isoformat(),
+        })
+    return pd.DataFrame(records, columns=CANONICAL_COLUMNS)
+
+
+def map_broker3(df):
+    records = []
+    for i, row in df.iterrows():
+        flags = []
+        match = match_product(row.get("Product_Description"))
+        if match is None:
+            flags.append("UNMATCHED_PRODUCT")
+        else:
+            flags.append("GRADE_DERIVED_FROM_PRODUCT_MASTER")  # Broker3 has no grade column
+        if pd.isna(row.get("Quantity_Traded")):
+            flags.append("MISSING_QUANTITY")
+
+        ts = pd.to_datetime(row.get("Timestamp"))
+        price = row.get("Trading_Price")
+        confidence, status, review = score_record(price, flags)
+
+        records.append({
+            "source_id": "SRC-103",
+            "source_name": "Broker3 Exchange Feed",
+            "source_file_name": "Broker3.csv",
+            "source_sheet_name": None,
+            "source_row_number": i + 2,
+            "product_name_raw": row.get("Product_Description"),
+            "product_id": match["product_id"] if match is not None else None,
+            "product_name_standardized": match["product_name_standardized"] if match is not None else None,
+            "product_grade": match["product_grade_standard"] if match is not None else None,
+            "market_region": row.get("Location"),
+            "pricing_date": ts.date().isoformat(),
+            "trade_date": ts.date().isoformat(),
+            "price": price,
+            "currency": row.get("Currency"),
+            "unit_of_measure": normalize_unit(row.get("Unit")),
+            "quantity": row.get("Quantity_Traded"),
+            "observation_type": "LAST_TRADED_PRICE",
+            "broker": row.get("Broker_Name"),
+            "counterparty": None,
+            "confidence_score": confidence,
+            "validation_status": status,
+            "review_required": review,
+            "created_timestamp": datetime.now(timezone.utc).isoformat(),
+        })
+    return pd.DataFrame(records, columns=CANONICAL_COLUMNS)
+
+
+# ---------------------------------------------------------------------------
+# Compute recipe outputs
+# ---------------------------------------------------------------------------
+
+Raw_Common_Extracted_Records_df = pd.concat(
+    [map_broker1(Raw_Broker1_df), map_broker2(Raw_Broker2_df), map_broker3(Raw_Broker3_df)],
+    ignore_index=True
+)
+
+# Write recipe outputs
+Raw_Common_Extracted_Records = dataiku.Dataset("Raw_Common_Extracted_Records")
+Raw_Common_Extracted_Records.write_with_schema(Raw_Common_Extracted_Records_df)
