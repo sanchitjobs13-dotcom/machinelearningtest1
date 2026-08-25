@@ -1,0 +1,11 @@
+Date,Commodity,Grade,Region,Bid,Ask,Last_Trade,Volume,Trader,Trade_Time,Notes
+2026-07-15,WTI Crude,Light Sweet,US Gulf Coast,78.40,78.50,78.45,500,Internal Trader,09:30,Morning fix price
+2026-07-15,ULSD,15 ppm,US Gulf Coast,2.408,2.420,2.415,1000,John Smith,09:45,Regular supplier
+2026-07-15,Brent Crude,Light Sweet,North Sea,76.85,76.95,76.90,750,EU Trader,10:15,North Sea Brent
+2026-07-15,Premium Gas,92 Octane,US Gulf Coast,2.585,2.595,2.589,500,Jane Doe,11:00,Standard premium grade
+2026-07-15,Fuel Oil No 2,Standard,US Gulf Coast,2.670,2.680,2.675,250,Bob Johnson,13:30,Afternoon quote
+2026-07-16,WTI Crude,Light Sweet,US Gulf Coast,78.55,78.65,78.60,600,Internal Trader,09:15,Opening price
+2026-07-16,ULSD,15 ppm,US Gulf Coast,2.415,2.425,2.420,800,John Smith,09:45,Slight uptick
+2026-07-16,Brent Crude,Light Sweet,North Sea,77.00,77.10,77.05,500,EU Trader,10:00,Following WTI
+2026-07-16,Premium Gas,92 Octane,US Gulf Coast,2.595,2.605,2.600,650,Jane Doe,11:30,Supply constraints
+2026-07-16,Fuel Oil No 2,Standard,US Gulf Coast,2.685,2.695,2.690,300,Bob Johnson,14:00,High demand

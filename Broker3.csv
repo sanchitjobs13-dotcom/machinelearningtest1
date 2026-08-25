@@ -1,0 +1,11 @@
+Timestamp,Symbol,Product_Description,Location,Trading_Price,Currency,Quantity_Traded,Unit,Broker_Name,Bid_Offer_Spread,Liquidity_Rating,Data_Source,Record_ID
+2026-07-15 09:30:00,WTI,West Texas Intermediate Crude,US Gulf,78.45,USD,500,Barrel,Commerical Bank A,0.10,High,CME Exchange,EXC-20260715-0001
+2026-07-15 10:15:00,ULSD,Ultra Low Sulfur Diesel #2,Gulf Coast Refinery,2.41,USD,1200,Gallon,Energy Trader B,0.015,High,OTC Market,EXC-20260715-0002
+2026-07-15 10:45:00,BRENT,Brent Crude Oil,North Sea,76.90,USD,750,Barrel,International Broker C,0.12,High,ICE Exchange,EXC-20260715-0003
+2026-07-15 11:30:00,RBOB,Reformulated Gasoline,NY Harbor,2.59,USD,500,Gallon,Regional Distributor D,0.025,Medium,NYMEX,EXC-20260715-0004
+2026-07-15 14:00:00,HO,Heating Oil,East Coast,2.67,USD,250,Gallon,Supplier E,0.02,Low,Physical Market,EXC-20260715-0005
+2026-07-16 08:45:00,WTI,West Texas Intermediate Crude,US Gulf,78.60,USD,600,Barrel,Commerical Bank A,0.10,High,CME Exchange,EXC-20260716-0001
+2026-07-16 09:20:00,ULSD,Ultra Low Sulfur Diesel #2,Gulf Coast Refinery,2.42,USD,1000,Gallon,Energy Trader B,0.015,High,OTC Market,EXC-20260716-0002
+2026-07-16 10:00:00,BRENT,Brent Crude Oil,North Sea,77.05,USD,800,Barrel,International Broker C,0.12,High,ICE Exchange,EXC-20260716-0003
+2026-07-16 11:15:00,RBOB,Reformulated Gasoline,NY Harbor,2.60,USD,650,Gallon,Regional Distributor D,0.025,Medium,NYMEX,EXC-20260716-0004
+2026-07-16 13:00:00,HO,Heating Oil,East Coast,2.70,USD,300,Gallon,Supplier E,0.02,High,Physical Market,EXC-20260716-0005

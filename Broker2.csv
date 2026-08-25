@@ -1,0 +1,10 @@
+Pricing_Date,Product_Name,Grade_Spec,Market,Price_USD_per_Unit,UOM,Counterparty,Source_Contact,Market_Event,Trade_Confirmation
+2026-07-15,Crude Oil WTI,Light Sweet Blend,USGC,78.45,BBL,Shell Trading Desk,trading@shell.com,Stable market,TC-20260715-001
+2026-07-15,Ultra Low Sulfur Diesel,15 ppm sulfur,Gulf Coast,2.41,GAL,Major Refiner,refiner@supplier.com,Supply steady,TC-20260715-002
+2026-07-15,Brent,Sweet Crude,North Sea,76.88,BBL,European Broker,broker@eu.com,Geopolitical tensions,TC-20260715-003
+2026-07-15,Regular Gasoline,87 Octane,Texas Gulf,2.48,GAL,Regional Supplier,sales@regional.com,Demand up,TC-20260715-004
+2026-07-16,Crude Oil WTI,Light Sweet Blend,USGC,78.60,BBL,Shell Trading Desk,trading@shell.com,Market recovery,TC-20260716-001
+2026-07-16,Ultra Low Sulfur Diesel,15 ppm sulfur,Gulf Coast,2.42,GAL,Major Refiner,refiner@supplier.com,Inventory down,TC-20260716-002
+2026-07-16,Brent,Sweet Crude,North Sea,77.02,BBL,European Broker,broker@eu.com,Followin WTI strength,TC-20260716-003
+2026-07-16,Regular Gasoline,87 Octane,Texas Gulf,2.50,GAL,Regional Supplier,sales@regional.com,Refinery constraints,TC-20260716-004
+2026-07-16,Heating Oil,#2 Distillate,Northeast,2.68,GAL,Northeast Supplier,ops@northeast.com,Seasonal demand,TC-20260716-005
